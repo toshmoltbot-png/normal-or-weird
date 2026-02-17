@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Normal or Weird? — Find Out How Normal You Really Are</title>
+  <meta name="description" content="Answer quick questions about your daily habits. See if you're normal or totally weird. Share your weirdness score!">
+  <meta property="og:title" content="Normal or Weird?">
+  <meta property="og:description" content="I just found out I'm weirder than 73% of people. How weird are you?">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #0a0a0f;
+      --card: #14141f;
+      --accent: #7c3aed;
+      --accent-glow: #a855f7;
+      --normal: #22c55e;
+      --weird: #f43f5e;
+      --text: #e2e8f0;
+      --muted: #64748b;
+    }
+    
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 3rem 1rem 1rem;
+      max-width: 600px;
+    }
+
+    .logo {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--normal), var(--accent-glow), var(--weird));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .tagline {
+      color: var(--muted);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .question-card {
+      background: var(--card);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      max-width: 500px;
+      width: 90%;
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .question-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+    }
+
+    .q-number {
+      color: var(--accent-glow);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 1rem;
+    }
+
+    .question-text {
+      font-size: 1.5rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 2rem;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .vote-btn {
+      padding: 1rem 2.5rem;
+      border: 2px solid;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: transparent;
+      min-width: 130px;
+    }
+
+    .vote-btn.yes {
+      border-color: var(--normal);
+      color: var(--normal);
+    }
+    .vote-btn.yes:hover {
+      background: var(--normal);
+      color: var(--bg);
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+    }
+
+    .vote-btn.no {
+      border-color: var(--weird);
+      color: var(--weird);
+    }
+    .vote-btn.no:hover {
+      background: var(--weird);
+      color: var(--bg);
+      box-shadow: 0 0 30px rgba(244, 63, 94, 0.3);
+    }
+
+    /* Results */
+    .results {
+      display: none;
+      margin-top: 1.5rem;
+    }
+
+    .results.show { display: block; }
+
+    .result-bar-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .result-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      width: 60px;
+      text-align: right;
+    }
+
+    .result-bar-bg {
+      flex: 1;
+      height: 36px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .result-bar-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      padding-left: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      min-width: fit-content;
+    }
+
+    .result-bar-fill.yes-bar {
+      background: linear-gradient(90deg, var(--normal), #4ade80);
+      color: #052e16;
+    }
+    .result-bar-fill.no-bar {
+      background: linear-gradient(90deg, var(--weird), #fb7185);
+      color: #4c0519;
+    }
+
+    .result-verdict {
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .result-verdict.normal {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: var(--normal);
+    }
+    .result-verdict.weird {
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: var(--weird);
+    }
+
+    .next-btn {
+      margin-top: 1.5rem;
+      padding: 0.9rem 2rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .next-btn:hover {
+      background: var(--accent-glow);
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+    }
+
+    /* Score screen */
+    .score-screen {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+    }
+    .score-screen.show { display: block; }
+
+    .score-big {
+      font-size: 5rem;
+      font-weight: 700;
+      margin: 1rem 0;
+    }
+    .score-big.mostly-normal {
+      background: linear-gradient(135deg, var(--normal), var(--accent-glow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .score-big.mostly-weird {
+      background: linear-gradient(135deg, var(--accent-glow), var(--weird));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .score-label {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .score-desc {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .share-btn {
+      padding: 1rem 2.5rem;
+      background: linear-gradient(135deg, var(--accent), var(--weird));
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 1rem;
+    }
+    .share-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px rgba(168, 85, 247, 0.5);
+    }
+
+    .restart-btn {
+      display: block;
+      margin: 1rem auto;
+      padding: 0.7rem 1.5rem;
+      background: transparent;
+      border: 1px solid var(--muted);
+      color: var(--muted);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .restart-btn:hover { border-color: var(--text); color: var(--text); }
+
+    .progress-bar {
+      width: 90%;
+      max-width: 500px;
+      height: 4px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 2px;
+      margin: 1.5rem auto;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--normal), var(--accent-glow), var(--weird));
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    .total-votes {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+    }
+
+    .footer {
+      margin-top: auto;
+      padding: 2rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+    .footer a { color: var(--accent-glow); text-decoration: none; }
+
+    @media (max-width: 480px) {
+      .logo { font-size: 2rem; }
+      .question-text { font-size: 1.25rem; }
+      .vote-btn { padding: 0.9rem 1.8rem; font-size: 1rem; }
+      .score-big { font-size: 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="logo">Normal or Weird?</div>
+    <p class="tagline">Answer 15 questions. Find out how normal you really are.</p>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress" style="width: 0%"></div>
+  </div>
+
+  <div class="question-card" id="questionCard">
+    <div class="q-number" id="qNumber">Question 1 of 15</div>
+    <div class="question-text" id="qText">Loading...</div>
+    
+    <div class="btn-row" id="btnRow">
+      <button class="vote-btn yes" onclick="vote('yes')">✋ Yeah</button>
+      <button class="vote-btn no" onclick="vote('no')">😬 Nope</button>
+    </div>
+
+    <div class="results" id="results">
+      <div class="result-bar-container">
+        <span class="result-label" style="color: var(--normal)">Yeah</span>
+        <div class="result-bar-bg">
+          <div class="result-bar-fill yes-bar" id="yesBar" style="width: 0%"></div>
+        </div>
+      </div>
+      <div class="result-bar-container">
+        <span class="result-label" style="color: var(--weird)">Nope</span>
+        <div class="result-bar-bg">
+          <div class="result-bar-fill no-bar" id="noBar" style="width: 0%"></div>
+        </div>
+      </div>
+      <div class="total-votes" id="totalVotes"></div>
+      <div class="result-verdict" id="verdict"></div>
+      <button class="next-btn" onclick="nextQuestion()">Next →</button>
+    </div>
+  </div>
+
+  <div class="score-screen" id="scoreScreen">
+    <div class="score-label">Your Weirdness Score</div>
+    <div class="score-big" id="scoreBig">73%</div>
+    <div class="score-desc" id="scoreDesc"></div>
+    <button class="share-btn" onclick="shareScore()">📱 Share My Score</button>
+    <p class="total-votes" id="shareNote">Tap to share on social media</p>
+    <button class="restart-btn" onclick="restart()">Play Again</button>
+  </div>
+
+  <div class="footer">
+    <p>Made with 🧠 by <a href="https://rich-archer.com">Rich Archer</a> · No data stored · Just vibes</p>
+  </div>
+
+<script>
+const QUESTIONS = [
+  { id: 1, text: "Do you eat the pizza crust?", yesIsNormal: true },
+  { id: 2, text: "Do you sleep with socks on?", yesIsNormal: false },
+  { id: 3, text: "Do you pee in the shower?", yesIsNormal: true },
+  { id: 4, text: "Do you talk to yourself out loud?", yesIsNormal: true },
+  { id: 5, text: "Do you put the milk in before the cereal?", yesIsNormal: false },
+  { id: 6, text: "Do you listen to the same song on repeat for hours?", yesIsNormal: true },
+  { id: 7, text: "Do you rehearse arguments in your head?", yesIsNormal: true },
+  { id: 8, text: "Do you sniff food before eating it?", yesIsNormal: true },
+  { id: 9, text: "Do you wave back at someone who wasn't waving at you?", yesIsNormal: true },
+  { id: 10, text: "Do you eat raw cookie dough?", yesIsNormal: true },
+  { id: 11, text: "Do you sleep with one leg out of the blanket?", yesIsNormal: true },
+  { id: 12, text: "Do you double-dip chips at a party?", yesIsNormal: false },
+  { id: 13, text: "Do you name your car?", yesIsNormal: false },
+  { id: 14, text: "Do you Google yourself?", yesIsNormal: true },
+  { id: 15, text: "Do you eat string cheese by biting it instead of peeling?", yesIsNormal: false },
+  { id: 16, text: "Do you stalk your own social media profiles?", yesIsNormal: true },
+  { id: 17, text: "Do you sit in the car after arriving to finish a song?", yesIsNormal: true },
+  { id: 18, text: "Do you check behind the shower curtain for intruders?", yesIsNormal: true },
+  { id: 19, text: "Do you pretend to text to avoid people?", yesIsNormal: true },
+  { id: 20, text: "Do you put ketchup on eggs?", yesIsNormal: false },
+  { id: 21, text: "Do you set multiple alarms in the morning?", yesIsNormal: true },
+  { id: 22, text: "Do you eat cereal as a late-night snack?", yesIsNormal: true },
+  { id: 23, text: "Do you mouth the words when reading silently?", yesIsNormal: false },
+  { id: 24, text: "Do you practice facial expressions in the mirror?", yesIsNormal: true },
+  { id: 25, text: "Do you smell your clothes to check if they're clean?", yesIsNormal: true },
+  { id: 26, text: "Do you dip fries in your milkshake?", yesIsNormal: true },
+  { id: 27, text: "Do you count stairs as you walk up them?", yesIsNormal: false },
+  { id: 28, text: "Do you narrate your life in your head like a movie?", yesIsNormal: true },
+  { id: 29, text: "Do you bite your toenails?", yesIsNormal: false },
+  { id: 30, text: "Do you pick the toppings off pizza and eat them first?", yesIsNormal: false },
+];
+
+// Shuffle and pick 15
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let questions = [];
+let current = 0;
+let weirdCount = 0;
+let answers = [];
+
+// Simulated vote data (seeded with realistic distributions)
+const VOTE_DATA = {};
+QUESTIONS.forEach(q => {
+  const normalPct = q.yesIsNormal ? (55 + Math.floor(Math.random() * 30)) : (20 + Math.floor(Math.random() * 25));
+  const total = 1000 + Math.floor(Math.random() * 50000);
+  VOTE_DATA[q.id] = {
+    yes: Math.floor(total * normalPct / 100),
+    no: total - Math.floor(total * normalPct / 100)
+  };
+});
+
+function startGame() {
+  questions = shuffle(QUESTIONS).slice(0, 15);
+  current = 0;
+  weirdCount = 0;
+  answers = [];
+  document.getElementById('scoreScreen').classList.remove('show');
+  document.getElementById('questionCard').style.display = 'block';
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = questions[current];
+  document.getElementById('qNumber').textContent = `Question ${current + 1} of 15`;
+  document.getElementById('qText').textContent = q.text;
+  document.getElementById('btnRow').style.display = 'flex';
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('progress').style.width = `${(current / 15) * 100}%`;
+}
+
+function vote(answer) {
+  const q = questions[current];
+  const isWeird = (answer === 'yes' && !q.yesIsNormal) || (answer === 'no' && q.yesIsNormal);
+  if (isWeird) weirdCount++;
+  answers.push({ q: q.text, answer, isWeird });
+
+  // Simulate adding our vote
+  const data = VOTE_DATA[q.id];
+  if (answer === 'yes') data.yes++;
+  else data.no++;
+
+  const total = data.yes + data.no;
+  const yesPct = Math.round((data.yes / total) * 100);
+  const noPct = 100 - yesPct;
+
+  // Show results
+  document.getElementById('btnRow').style.display = 'none';
+  const results = document.getElementById('results');
+  results.classList.add('show');
+  
+  setTimeout(() => {
+    document.getElementById('yesBar').style.width = `${Math.max(yesPct, 8)}%`;
+    document.getElementById('yesBar').textContent = `${yesPct}%`;
+    document.getElementById('noBar').style.width = `${Math.max(noPct, 8)}%`;
+    document.getElementById('noBar').textContent = `${noPct}%`;
+  }, 50);
+
+  document.getElementById('totalVotes').textContent = `${total.toLocaleString()} votes`;
+
+  const verdict = document.getElementById('verdict');
+  if (isWeird) {
+    verdict.textContent = '🤪 That\'s weird — but you do you!';
+    verdict.className = 'result-verdict weird';
+  } else {
+    verdict.textContent = '✅ Totally normal. You\'re not alone.';
+    verdict.className = 'result-verdict normal';
+  }
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= 15) {
+    showScore();
+  } else {
+    showQuestion();
+  }
+}
+
+function showScore() {
+  document.getElementById('questionCard').style.display = 'none';
+  document.getElementById('progress').style.width = '100%';
+  
+  const score = Math.round((weirdCount / 15) * 100);
+  const screen = document.getElementById('scoreScreen');
+  screen.classList.add('show');
+  
+  const scoreBig = document.getElementById('scoreBig');
+  scoreBig.textContent = `${score}%`;
+  scoreBig.className = score > 50 ? 'score-big mostly-weird' : 'score-big mostly-normal';
+
+  const desc = document.getElementById('scoreDesc');
+  if (score <= 20) {
+    desc.textContent = "You're disgustingly normal. Like, suspiciously normal. Are you sure you're being honest?";
+  } else if (score <= 40) {
+    desc.textContent = "Pretty normal with a few quirks. You've got just enough weird to be interesting.";
+  } else if (score <= 60) {
+    desc.textContent = "Right in the middle. Half normal, half unhinged. The best kind of person.";
+  } else if (score <= 80) {
+    desc.textContent = "You're officially weird. But the good kind of weird. The kind people write songs about.";
+  } else {
+    desc.textContent = "You're a full-blown weirdo and honestly? We respect it. Never change. 🫡";
+  }
+}
+
+function shareScore() {
+  const score = Math.round((weirdCount / 15) * 100);
+  const text = `I'm ${score}% weird according to Normal or Weird 🤪\n\nHow weird are you? Find out 👇\nhttps://normalorweird.com`;
+  
+  if (navigator.share) {
+    navigator.share({ text }).catch(() => {
+      copyToClipboard(text);
+    });
+  } else {
+    copyToClipboard(text);
+  }
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('shareNote').textContent = '✅ Copied to clipboard!';
+    setTimeout(() => {
+      document.getElementById('shareNote').textContent = 'Tap to share on social media';
+    }, 2000);
+  });
+}
+
+function restart() {
+  startGame();
+}
+
+// Start
+startGame();
+</script>
+</body>
+</html>
