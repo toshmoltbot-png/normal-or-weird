@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: normal-or-weird
+    runtime: static
+    staticPublishPath: public
+    pullRequestPreviewsEnabled: false
